@@ -13,7 +13,7 @@ CREATE TABLE "tiger2006" (gid serial PRIMARY KEY,
 "tlid" numeric(10,0),
 "cfcc" varchar(3),
 "fullname" varchar(100));
-SELECT AddGeometryColumn('','tiger2006','the_geom','-1','MULTILINESTRING',2);
+SELECT AddGeometryColumn('','tiger2006','geom','-1','MULTILINESTRING',2);
 EOF
 ;
 
@@ -67,7 +67,7 @@ for $file (@ARGV) {
 		@lats = @{$lats{$tlid}};
 		@lons = @{$lons{$tlid}};
 
-		print "INSERT INTO \"tiger2006\" (\"tlid\",\"cfcc\",\"fullname\",the_geom) ";
+		print "INSERT INTO \"tiger2006\" (\"tlid\",\"cfcc\",\"fullname\",geom) ";
 		print "VALUES ('$tlid','$cfcc','$fullname',";
 		print "GeomFromText('MULTILINESTRING((";
 

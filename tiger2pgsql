@@ -1,0 +1,87 @@
+#!/usr/bin/perl
+
+if ($#ARGV < 0) {
+	print STDERR "Usage: $0 TGR*.ZIP\n";
+	exit 1;
+}
+
+print <<EOF
+SET CLIENT_ENCODING TO UTF8;
+SET STANDARD_CONFORMING_STRINGS TO ON;
+BEGIN;
+CREATE TABLE "tiger2006" (gid serial PRIMARY KEY,
+"tlid" numeric(10,0),
+"cfcc" varchar(3),
+"fullname" varchar(100));
+SELECT AddGeometryColumn('','tiger2006','the_geom','-1','MULTILINESTRING',2);
+EOF
+;
+
+for $file (@ARGV) {
+	$county = substr($file, length($file) - 9, 5);
+
+	open(IN, "unzip -p $file TGR$county.RT2 |");
+	while (<IN>) {
+		chomp;
+		$tlid = substr($_, 5, 10);
+		$tlid =~ s/^ *//;
+
+		for ($i = 18; $i < 208; $i += 19) {
+			$lon = sprintf("%.6f", substr($_, $i, 10) / 1000000);
+			$lat = sprintf("%.6f", substr($_, $i + 10, 9) / 1000000);
+
+			if ($lat != 0) {
+				push @{$lats{$tlid}}, $lat;
+				push @{$lons{$tlid}}, $lon;
+			}
+		}
+	}
+	close(IN);
+
+	open(IN, "unzip -p $file TGR$county.RT1 |");
+	while (<IN>) {
+		chomp;
+		$tlid = substr($_, 5, 10);
+		$tlid =~ s/^ *//;
+
+		$fullname = substr($_, 17, 2 + 30 + 4 + 2);
+		$fullname =~ s/^ *//;
+		$fullname =~ s/ *$//;
+		$fullname =~ s/ +/ /g;
+
+		$fullname =~ s/'/''/g;
+
+		$cfcc = substr($_, 55, 3);
+
+		$startlon = sprintf("%.6f", substr($_, 190, 10) / 1000000);
+		$startlat = sprintf("%.6f", substr($_, 200, 9) / 1000000);
+		$endlon = sprintf("%.6f", substr($_, 209, 10) / 1000000);
+		$endlat = sprintf("%.6f", substr($_, 219, 9) / 1000000);
+
+		unshift @{$lats{$tlid}}, $startlat;
+		unshift @{$lons{$tlid}}, $startlon;
+
+		push @{$lats{$tlid}}, $endlat;
+		push @{$lons{$tlid}}, $endlon;
+
+		@lats = @{$lats{$tlid}};
+		@lons = @{$lons{$tlid}};
+
+		print "INSERT INTO \"tiger2006\" (\"tlid\",\"cfcc\",\"fullname\",the_geom) ";
+		print "VALUES ('$tlid','$cfcc','$fullname',";
+		print "GeomFromText('MULTILINESTRING((";
+
+		for ($i = 0; $i <= $#lats; $i++) {
+			printf("%.6f %.6f", $lats[$i], $lons[$i]);
+
+			if ($i + 1 <= $#lats) {
+				print ","
+			}
+		}
+
+		print "))', -1));\n";
+	}
+	close(IN);
+}
+
+print "COMMIT;\n";

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-dropdb -U postgres tiger2006
-createdb -U postgres -T template_postgis tiger2006
+# dropdb -U postgres tiger2006
+# createdb -U postgres -T template_postgis tiger2006
 
-./tiger2pgsql ${1+"$@"} | psql -U postgres tiger2006
+./tiger2pgsql ${1+"$@"} | psql -U postgres tigeredges
 
-echo "CREATE INDEX tiger2006_geom ON tiger2006 USING GIST(geom);" | psql -U postgres tiger2006
+echo "CREATE INDEX tiger2006_geom ON tiger2006 USING GIST(geom);" | psql -U postgres tigeredges
 

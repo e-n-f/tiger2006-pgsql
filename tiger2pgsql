@@ -14,11 +14,14 @@ CREATE TABLE "tiger2006" (gid serial PRIMARY KEY,
 "cfcc" varchar(3),
 "fullname" varchar(100));
 SELECT AddGeometryColumn('','tiger2006','geom','0','MULTILINESTRING',2);
+COMMIT;
 EOF
 ;
 
 for $file (@ARGV) {
 	$county = substr($file, length($file) - 9, 5);
+
+	print "BEGIN;\n";
 
 	open(IN, "unzip -p $file TGR$county.RT2 |");
 	while (<IN>) {
@@ -82,6 +85,7 @@ for $file (@ARGV) {
 		print "))');\n";
 	}
 	close(IN);
+
+	print "COMMIT;\n";
 }
 
-print "COMMIT;\n";

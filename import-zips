@@ -5,5 +5,5 @@
 
 ./tiger2pgsql ${1+"$@"} | psql -U postgres tigeredges
 
-echo "CREATE INDEX tiger2006_geom ON tiger2006 USING GIST(geom);" | psql -U postgres tigeredges
+echo "CREATE INDEX tiger2006_geom3 ON tiger2006 USING GIST(geom);" | psql -U postgres tigeredges
 

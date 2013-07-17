@@ -21,6 +21,11 @@ EOF
 for $file (@ARGV) {
 	$county = substr($file, length($file) - 9, 5);
 
+	print STDERR "$file $county\n";
+
+	%lats = ();
+	%lons = ();
+
 	print "BEGIN;\n";
 
 	open(IN, "unzip -p $file TGR$county.RT2 |");

@@ -75,7 +75,7 @@ for $file (@ARGV) {
 		print "'MULTILINESTRING((";
 
 		for ($i = 0; $i <= $#lats; $i++) {
-			printf("%.6f %.6f", $lats[$i], $lons[$i]);
+			printf("%.6f %.6f", $lons[$i], $lats[$i]);
 
 			if ($i + 1 <= $#lats) {
 				print ","
